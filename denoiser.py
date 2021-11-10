@@ -85,7 +85,8 @@ noisy_test_data = np.array(noisy_test_data)
 
 train_data = preprocess(train_data)
 test_data = preprocess(test_data)
-
+noisy_train_data = preprocess(noisy_train_data)
+noisy_test_data = preprocess(noisy_test_data)
 # Create a copy of the data with added noise
 # noisy_train_data = noise(train_data)
 # noisy_test_data = noise(test_data)
