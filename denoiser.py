@@ -13,7 +13,7 @@ def preprocess(array):
     """
 
     array = array.astype("float32") / 255.0
-    array = np.reshape(array, (len(array), 28, 28, 1))
+    array = np.reshape(array, (len(array), 128, 128, 1))
     return array
 
 
@@ -44,18 +44,18 @@ def display(array1, array2):
     plt.figure(figsize=(20, 4))
     for i, (image1, image2) in enumerate(zip(images1, images2)):
         ax = plt.subplot(2, n, i + 1)
-        plt.imshow(image1.reshape(28, 28))
+        plt.imshow(image1.reshape(128, 128))
         plt.gray()
         ax.get_xaxis().set_visible(False)
         ax.get_yaxis().set_visible(False)
 
         ax = plt.subplot(2, n, i + 1 + n)
-        plt.imshow(image2.reshape(28, 28))
+        plt.imshow(image2.reshape(128, 128))
         plt.gray()
         ax.get_xaxis().set_visible(False)
         ax.get_yaxis().set_visible(False)
 
-    plt.show()
+    plt.savefig('noisy.png')
 
 # Since we only need images from the dataset to encode and decode, we
 # won't use the labels.
@@ -64,19 +64,25 @@ def display(array1, array2):
 train_data = []
 noisy_train_data = []
 for filename in glob.glob('USPTO-50K-IMAGES-TGT-TRAIN/*'):
-    train_data.append(np.load(filename))
+    train_data.append(np.reshape(np.load(filename), [128, 128, 1]))
 
 for filename in glob.glob('USPTO-50K-IMAGES-SRC-TRAIN/*'):
-    noisy_train_data.append(np.load(filename))
+    noisy_train_data.append(np.reshape(np.load(filename), [128, 128, 1]))
 
 test_data = []
 noisy_test_data = []
 for filename in glob.glob('USPTO-50K-IMAGES-TGT-TEST/*'):
-    test_data.append(np.load(filename))
+    test_data.append(np.reshape(np.load(filename), [128, 128, 1]))
 
 for filename in glob.glob('USPTO-50K-IMAGES-SRC-TEST/*'):
-    noisy_test_data.append(np.load(filename))
+    noisy_test_data.append(np.reshape(np.load(filename), [128, 128, 1]))
+    
 # Normalize and reshape the data
+train_data = np.array(train_data)
+test_data = np.array(test_data)
+noisy_train_data = np.array(noisy_train_data)
+noisy_test_data = np.array(noisy_test_data)
+
 train_data = preprocess(train_data)
 test_data = preprocess(test_data)
 
@@ -87,7 +93,7 @@ test_data = preprocess(test_data)
 # Display the train data and a version of it with added noise
 # display(train_data, noisy_train_data)
 
-input = layers.Input(shape=(28, 28, 1))
+input = layers.Input(shape=(128, 128, 1))
 
 # Encoder
 x = layers.Conv2D(32, (3, 3), activation="relu", padding="same")(input)
@@ -115,12 +121,12 @@ autoencoder.summary()
 autoencoder.fit(
     x=noisy_train_data,
     y=train_data,
-    epochs=100,
+    epochs=25,
     batch_size=128,
     shuffle=True,
     validation_data=(noisy_test_data, test_data),
 )
 
 predictions = autoencoder.predict(test_data)
-# display(test_data, predictions)
+display(test_data, predictions)
 
