@@ -16,20 +16,6 @@ def preprocess(array):
     array = np.reshape(array, (len(array), 128, 128, 1))
     return array
 
-
-def noise(array):
-    """
-    Adds random noise to each image in the supplied array.
-    """
-
-    noise_factor = 0.4
-    noisy_array = array + noise_factor * np.random.normal(
-        loc=0.0, scale=1.0, size=array.shape
-    )
-
-    return np.clip(noisy_array, 0.0, 1.0)
-
-
 def display(array1, array2):
     """
     Displays ten random images from each one of the supplied arrays.
@@ -55,44 +41,45 @@ def display(array1, array2):
         ax.get_xaxis().set_visible(False)
         ax.get_yaxis().set_visible(False)
 
-    plt.savefig('noisy.png')
+    plt.savefig('out.png')
 
 # Since we only need images from the dataset to encode and decode, we
 # won't use the labels.
-# (train_data, _), (test_data, _) = mnist.load_data()
+# (train_data_tgt, ), (test_data_tgt, ) = mnist.load_data()
 
-train_data = []
-noisy_train_data = []
+train_data_tgt = []
+train_data_src = []
+
 for filename in glob.glob('USPTO-50K-IMAGES-TGT-TRAIN/*'):
-    train_data.append(np.reshape(np.load(filename), [128, 128, 1]))
+    train_data_tgt.append(np.reshape(np.load(filename), [128, 128, 1]))
 
 for filename in glob.glob('USPTO-50K-IMAGES-SRC-TRAIN/*'):
-    noisy_train_data.append(np.reshape(np.load(filename), [128, 128, 1]))
+    train_data_src.append(np.reshape(np.load(filename), [128, 128, 1]))
 
-test_data = []
-noisy_test_data = []
+test_data_tgt = []
+test_data_src = []
 for filename in glob.glob('USPTO-50K-IMAGES-TGT-TEST/*'):
-    test_data.append(np.reshape(np.load(filename), [128, 128, 1]))
+    test_data_tgt.append(np.reshape(np.load(filename), [128, 128, 1]))
 
 for filename in glob.glob('USPTO-50K-IMAGES-SRC-TEST/*'):
-    noisy_test_data.append(np.reshape(np.load(filename), [128, 128, 1]))
+    test_data_src.append(np.reshape(np.load(filename), [128, 128, 1]))
     
 # Normalize and reshape the data
-train_data = np.array(train_data)
-test_data = np.array(test_data)
-noisy_train_data = np.array(noisy_train_data)
-noisy_test_data = np.array(noisy_test_data)
+train_data_tgt = np.array(train_data_tgt)
+test_data_tgt = np.array(test_data_tgt)
+train_data_src = np.array(train_data_src)
+test_data_src = np.array(test_data_src)
 
-train_data = preprocess(train_data)
-test_data = preprocess(test_data)
-noisy_train_data = preprocess(noisy_train_data)
-noisy_test_data = preprocess(noisy_test_data)
+train_data_tgt = preprocess(train_data_tgt)
+test_data_tgt = preprocess(test_data_tgt)
+train_data_src = preprocess(train_data_src)
+test_data_src = preprocess(test_data_src)
 # Create a copy of the data with added noise
-# noisy_train_data = noise(train_data)
-# noisy_test_data = noise(test_data)
+# train_data_src = noise(train_data_tgt)
+# test_data_src = noise(test_data_tgt)
 
 # Display the train data and a version of it with added noise
-# display(train_data, noisy_train_data)
+# display(train_data_tgt, train_data_src)
 
 input = layers.Input(shape=(128, 128, 1))
 
@@ -120,14 +107,13 @@ autoencoder.summary()
 # LR .1 .01 .001
 # BATCH SIZE 20, 100, 500
 autoencoder.fit(
-    x=noisy_train_data,
-    y=train_data,
+    x=train_data_src,
+    y=train_data_tgt,
     epochs=25,
     batch_size=128,
     shuffle=True,
-    validation_data=(noisy_test_data, test_data),
+    validation_data=(test_data_src, test_data_tgt),
 )
 
-predictions = autoencoder.predict(test_data)
-display(test_data, predictions)
-
+predictions = autoencoder.predict(test_data_src)
+display(test_data_tgt, predictions)
