@@ -1,7 +1,7 @@
 import numpy as np
 import tensorflow as tf
 import matplotlib.pyplot as plt
-
+import glob
 from tensorflow.keras import layers
 from tensorflow.keras.datasets import mnist
 from tensorflow.keras.models import Model
@@ -59,18 +59,33 @@ def display(array1, array2):
 
 # Since we only need images from the dataset to encode and decode, we
 # won't use the labels.
-(train_data, _), (test_data, _) = mnist.load_data()
+# (train_data, _), (test_data, _) = mnist.load_data()
 
+train_data = []
+noisy_train_data = []
+for filename in glob.glob('USPTO-50K-IMAGES-TGT-TRAIN/*'):
+    train_data.append(np.load(filename))
+
+for filename in glob.glob('USPTO-50K-IMAGES-SRC-TRAIN/*'):
+    noisy_train_data.append(np.load(filename))
+
+test_data = []
+noisy_test_data = []
+for filename in glob.glob('USPTO-50K-IMAGES-TGT-TEST/*'):
+    test_data.append(np.load(filename))
+
+for filename in glob.glob('USPTO-50K-IMAGES-SRC-TEST/*'):
+    noisy_test_data.append(np.load(filename))
 # Normalize and reshape the data
 train_data = preprocess(train_data)
 test_data = preprocess(test_data)
 
 # Create a copy of the data with added noise
-noisy_train_data = noise(train_data)
-noisy_test_data = noise(test_data)
+# noisy_train_data = noise(train_data)
+# noisy_test_data = noise(test_data)
 
 # Display the train data and a version of it with added noise
-display(train_data, noisy_train_data)
+# display(train_data, noisy_train_data)
 
 input = layers.Input(shape=(28, 28, 1))
 
@@ -107,5 +122,5 @@ autoencoder.fit(
 )
 
 predictions = autoencoder.predict(test_data)
-display(test_data, predictions)
+# display(test_data, predictions)
 
