@@ -7,6 +7,7 @@ import glob
 from tempfile import TemporaryFile
 from rdkit.Chem.Draw import SimilarityMaps
 from rdkit.Chem import AllChem
+from rdkit import Chem
 
 idx_src_train_arr = []
 image_src_train_list = []
@@ -25,7 +26,7 @@ for idx in range(len(chunks)):
         # print(idx)
         idx_src_train_arr.append(idx)
 smiles.close()
-mols = [pybel.readstring("smi", x) for x in chunks]
+mols = [Chem.MolFromSmiles(x) for x in chunks]
 # valid_mols = [i for i in mols if i != None]
 for idx in idx_src_train_arr:
     AllChem.ComputeGasteigerCharges(mols[idx])
@@ -43,7 +44,7 @@ chunks.remove('')
 for idx in range(len(chunks)):
     chunks[idx] = chunks[idx].replace(" ", "")
 smiles.close()
-mols = [pybel.readstring("smi", x) for x in chunks]
+mols = [Chem.MolFromSmiles(x) for x in chunks]
 # for idx in idx_src_train_arr:
 #     mols[idx].draw(False, "USPTO-50K-IMAGES-TGT-TRAIN/mol-{0}.png".format(idx))
 for idx in idx_src_train_arr:
@@ -109,7 +110,7 @@ for idx in range(len(chunks)):
         # print(idx)
         idx_src_test_arr.append(idx)
 smiles.close()
-mols = [pybel.readstring("smi", x) for x in chunks]
+mols = [Chem.MolFromSmiles(x) for x in chunks]
 # for idx in idx_src_test_arr:
 #     mols[idx].draw(False, "USPTO-50K-IMAGES-SRC-TEST/mol-{0}.png".format(idx))
     # image_src_test_list.append(mols[idx].draw(show = False, filename = png))
@@ -126,7 +127,7 @@ chunks.remove('')
 for idx in range(len(chunks)):
     chunks[idx] = chunks[idx].replace(" ", "")
 smiles.close()
-mols = [pybel.readstring("smi", x) for x in chunks]
+mols = [Chem.MolFromSmiles(x) for x in chunks]
 # for idx in idx_src_test_arr:
 #     mols[idx].draw(False, "USPTO-50K-IMAGES-TGT-TEST/mol-{0}.png".format(idx))
 for idx in idx_src_test_arr:
