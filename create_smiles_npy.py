@@ -5,6 +5,8 @@ import os
 import cv2
 import glob
 from tempfile import TemporaryFile
+from rdkit.Chem.Draw import SimilarityMaps
+from rdkit.Chem import AllChem
 
 idx_src_train_arr = []
 image_src_train_list = []
@@ -24,8 +26,14 @@ for idx in range(len(chunks)):
         idx_src_train_arr.append(idx)
 smiles.close()
 mols = [pybel.readstring("smi", x) for x in chunks]
+# valid_mols = [i for i in mols if i != None]
 for idx in idx_src_train_arr:
-    mols[idx].draw(False, "USPTO-50K-IMAGES-SRC-TRAIN/mol-{0}.png".format(idx))
+    AllChem.ComputeGasteigerCharges(mols[idx])
+    contribs = [mols[idx].GetAtomWithIdx(i).GetDoubleProp('_GasteigerCharge') for i in range(mols[idx].GetNumAtoms())]
+    fig = SimilarityMaps.GetSimilarityMapFromWeights(mols[idx], contribs, colorMap=None,  contourLines=10)
+    fig.savefig("USPTO-50K-IMAGES-SRC-TRAIN/mol-{0}.png".format(idx), bbox_inches='tight')
+# for idx in idx_src_train_arr:
+#     mols[idx].draw(False, "USPTO-50K-IMAGES-SRC-TRAIN/mol-{0}.png".format(idx))
     # image_src_train_list.append(mols[idx].draw(show = False, filename = png))
 
 smiles = open('USPTO-50K/tgt-train.txt', 'r')
@@ -36,8 +44,13 @@ for idx in range(len(chunks)):
     chunks[idx] = chunks[idx].replace(" ", "")
 smiles.close()
 mols = [pybel.readstring("smi", x) for x in chunks]
+# for idx in idx_src_train_arr:
+#     mols[idx].draw(False, "USPTO-50K-IMAGES-TGT-TRAIN/mol-{0}.png".format(idx))
 for idx in idx_src_train_arr:
-    mols[idx].draw(False, "USPTO-50K-IMAGES-TGT-TRAIN/mol-{0}.png".format(idx))
+    AllChem.ComputeGasteigerCharges(mols[idx])
+    contribs = [mols[idx].GetAtomWithIdx(i).GetDoubleProp('_GasteigerCharge') for i in range(mols[idx].GetNumAtoms())]
+    fig = SimilarityMaps.GetSimilarityMapFromWeights(mols[idx], contribs, colorMap=None,  contourLines=10)
+    fig.savefig("USPTO-50K-IMAGES-TGT-TRAIN/mol-{0}.png".format(idx), bbox_inches='tight')
 
 #get the list of images from our first type of reactions
 for filename in glob.glob('USPTO-50K-IMAGES-SRC-TRAIN/*'):
@@ -97,9 +110,14 @@ for idx in range(len(chunks)):
         idx_src_test_arr.append(idx)
 smiles.close()
 mols = [pybel.readstring("smi", x) for x in chunks]
-for idx in idx_src_test_arr:
-    mols[idx].draw(False, "USPTO-50K-IMAGES-SRC-TEST/mol-{0}.png".format(idx))
+# for idx in idx_src_test_arr:
+#     mols[idx].draw(False, "USPTO-50K-IMAGES-SRC-TEST/mol-{0}.png".format(idx))
     # image_src_test_list.append(mols[idx].draw(show = False, filename = png))
+for idx in idx_src_test_arr:
+    AllChem.ComputeGasteigerCharges(mols[idx])
+    contribs = [mols[idx].GetAtomWithIdx(i).GetDoubleProp('_GasteigerCharge') for i in range(mols[idx].GetNumAtoms())]
+    fig = SimilarityMaps.GetSimilarityMapFromWeights(mols[idx], contribs, colorMap=None,  contourLines=10)
+    fig.savefig("USPTO-50K-IMAGES-SRC-TEST/mol-{0}.png".format(idx), bbox_inches='tight')
 
 smiles = open('USPTO-50K/tgt-test.txt', 'r')
 content = smiles.read()
@@ -109,8 +127,13 @@ for idx in range(len(chunks)):
     chunks[idx] = chunks[idx].replace(" ", "")
 smiles.close()
 mols = [pybel.readstring("smi", x) for x in chunks]
+# for idx in idx_src_test_arr:
+#     mols[idx].draw(False, "USPTO-50K-IMAGES-TGT-TEST/mol-{0}.png".format(idx))
 for idx in idx_src_test_arr:
-    mols[idx].draw(False, "USPTO-50K-IMAGES-TGT-TEST/mol-{0}.png".format(idx))
+    AllChem.ComputeGasteigerCharges(mols[idx])
+    contribs = [mols[idx].GetAtomWithIdx(i).GetDoubleProp('_GasteigerCharge') for i in range(mols[idx].GetNumAtoms())]
+    fig = SimilarityMaps.GetSimilarityMapFromWeights(mols[idx], contribs, colorMap=None,  contourLines=10)
+    fig.savefig("USPTO-50K-IMAGES-TGT-TEST/mol-{0}.png".format(idx), bbox_inches='tight')
 
 #get the list of images from our first type of reactions
 for filename in glob.glob('USPTO-50K-IMAGES-SRC-TEST/*'):

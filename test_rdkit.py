@@ -1,11 +1,14 @@
 # from openbabel import pybel
 from rdkit.Chem.Draw import SimilarityMaps
 from rdkit.Chem import AllChem
+from rdkit.Chem import Draw
 import matplotlib
 from rdkit import Chem
 import cv2
 import numpy as np
 from numpy import asarray
+import io
+from PIL import Image
 
 idx_src_train_arr = []
 image_src_train_list = []
@@ -35,7 +38,8 @@ for mol in valid_mols:
     AllChem.ComputeGasteigerCharges(mol)
     contribs = [mol.GetAtomWithIdx(i).GetDoubleProp('_GasteigerCharge') for i in range(mol.GetNumAtoms())]
     fig = SimilarityMaps.GetSimilarityMapFromWeights(mol, contribs, colorMap=None,  contourLines=10)
-    grey_img = cv2.cvtColor(fig, cv2.COLOR_BGR2GRAY)
+    fig.savefig("test_out.png", bbox_inches='tight')
+    grey_img = cv2.cvtColor(d, cv2.COLOR_BGR2GRAY)
     resized = cv2.resize(grey_img, (128, 128) , interpolation= cv2.INTER_AREA)
     kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (3,3))
     resized = cv2.erode(resized, kernel, iterations=1)
