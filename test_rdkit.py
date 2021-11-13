@@ -3,6 +3,9 @@ from rdkit.Chem.Draw import SimilarityMaps
 from rdkit.Chem import AllChem
 import matplotlib
 from rdkit import Chem
+import cv2
+import numpy as np
+from numpy import asarray
 
 idx_src_train_arr = []
 image_src_train_list = []
@@ -32,3 +35,10 @@ for mol in valid_mols:
     AllChem.ComputeGasteigerCharges(mol)
     contribs = [mol.GetAtomWithIdx(i).GetDoubleProp('_GasteigerCharge') for i in range(mol.GetNumAtoms())]
     fig = SimilarityMaps.GetSimilarityMapFromWeights(mol, contribs, colorMap=None,  contourLines=10)
+    grey_img = cv2.cvtColor(fig, cv2.COLOR_BGR2GRAY)
+    resized = cv2.resize(grey_img, (128, 128) , interpolation= cv2.INTER_AREA)
+    kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (3,3))
+    resized = cv2.erode(resized, kernel, iterations=1)
+    flatten = resized.flatten()
+    image_src_train_list.append(flatten)
+    np.save("USPTO-50K-IMAGES/mol-{0}.npy".format(idx), asarray(flatten))
