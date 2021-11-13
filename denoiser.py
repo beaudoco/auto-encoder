@@ -100,7 +100,8 @@ x = layers.Conv2D(1, (3, 3), activation="sigmoid", padding="same")(x)
 
 # Autoencoder
 autoencoder = Model(input, x)
-autoencoder.compile(optimizer="adam", loss="binary_crossentropy")
+optimizer = tf.keras.optimizers.Adam(lr=0.0001)
+autoencoder.compile(optimizer=optimizer, loss="binary_crossentropy")
 autoencoder.summary()
 
 # PLAY W/ LEARNING RATE & BATCH SIZE
@@ -109,7 +110,7 @@ autoencoder.summary()
 autoencoder.fit(
     x=train_data_src,
     y=train_data_tgt,
-    epochs=25,
+    epochs=50,
     batch_size=128,
     shuffle=True,
     validation_data=(test_data_src, test_data_tgt),
