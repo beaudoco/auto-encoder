@@ -34,15 +34,29 @@ mols = [Chem.MolFromSmiles(x) for x in chunks]
 
 
 valid_mols = [i for i in mols if i != None]
-for mol in valid_mols:
-    AllChem.ComputeGasteigerCharges(mol)
-    contribs = [mol.GetAtomWithIdx(i).GetDoubleProp('_GasteigerCharge') for i in range(mol.GetNumAtoms())]
-    fig = SimilarityMaps.GetSimilarityMapFromWeights(mol, contribs, colorMap=None,  contourLines=10)
-    fig.savefig("test_out.png", bbox_inches='tight')
-    grey_img = cv2.cvtColor(d, cv2.COLOR_BGR2GRAY)
-    resized = cv2.resize(grey_img, (128, 128) , interpolation= cv2.INTER_AREA)
-    kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (3,3))
-    resized = cv2.erode(resized, kernel, iterations=1)
-    flatten = resized.flatten()
-    image_src_train_list.append(flatten)
-    np.save("USPTO-50K-IMAGES/mol-{0}.npy".format(idx), asarray(flatten))
+for idx in idx_src_train_arr:
+    AllChem.ComputeGasteigerCharges(mols[idx])
+    contribs = [mols[idx].GetAtomWithIdx(i).GetDoubleProp('_GasteigerCharge') for i in range(mols[idx].GetNumAtoms())]
+    fig = SimilarityMaps.GetSimilarityMapFromWeights(mols[idx], contribs, colorMap=None,  contourLines=10)
+    fig.savefig("USPTO-50K-IMAGES/mol-{0}.png".format(idx), bbox_inches='tight')
+    # grey_img = cv2.cvtColor(d, cv2.COLOR_BGR2GRAY)
+    # resized = cv2.resize(grey_img, (128, 128) , interpolation= cv2.INTER_AREA)
+    # kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (3,3))
+    # resized = cv2.erode(resized, kernel, iterations=1)
+    # flatten = resized.flatten()
+    # image_src_train_list.append(flatten)
+    # np.save("USPTO-50K-IMAGES/mol-{0}.npy".format(idx), asarray(flatten))
+
+img = cv2.imread("USPTO-50K-IMAGES/mol-0.png")
+grey_img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+resized = cv2.resize(grey_img, (128, 128) , interpolation= cv2.INTER_AREA)
+kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (3,3))
+# resized = cv2.erode(resized, kernel, iterations=1)
+flatten = resized.flatten()
+image_src_train_list.append(flatten)
+np.save("test_out.npy", asarray(flatten))
+# print("shrunk {0}".format(idx))
+# f = open("USPTO-50K-IMAGES-SRC-TRAIN/mol-{0}.npy".format(idx), "w")
+# f.write(asarray(flatten))
+# f.close()
+# os.remove("USPTO-50K-IMAGES-SRC-TRAIN/mol-{0}.png".format(idx))
