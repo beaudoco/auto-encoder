@@ -19,6 +19,7 @@ chunks.remove('')
 chunks2 = content.split('\n')
 chunks2.remove('')
 content_src_train = smiles.read()
+mols = []
 for idx in range(len(chunks)):
     chunks[idx] = chunks[idx].replace(" ", "").split('>',1)[1]
     chunks2[idx] = chunks2[idx].replace(" ", "")
@@ -26,19 +27,29 @@ for idx in range(len(chunks)):
     if(chunks2[idx].split('>',1)[0].replace("<RX_","") == "1"):
         # print(idx)
         idx_src_train_arr.append(idx)
+
+        mol = (Chem.MolFromSmiles(chunks[idx]))
+        AllChem.ComputeGasteigerCharges(mol)
+        contribs = [mol.GetAtomWithIdx(i).GetDoubleProp('_GasteigerCharge') for i in range(mol.GetNumAtoms())]
+        fig = SimilarityMaps.GetSimilarityMapFromWeights(mol, contribs, colorMap=None,  contourLines=10)
+        fig.savefig("USPTO-50K-IMAGES/mol-{0}.png".format(idx), bbox_inches='tight')
+
 smiles.close()
-mols = [Chem.MolFromSmiles(x) for x in chunks]
+# mols = [Chem.MolFromSmiles(x) for x in chunks]
+mols = []
+for x in chunks:
+    mols.append(Chem.MolFromSmiles(x))
 # for idx in idx_src_train_arr:
 #     mols[idx].draw(False, "USPTO-50K-IMAGES-SRC-TRAIN/mol-{0}.png".format(idx))
 #     # image_src_train_list.append(mols[idx].draw(show = False, filename = png))
 
 
-valid_mols = [i for i in mols if i != None]
-for idx in idx_src_train_arr:
-    AllChem.ComputeGasteigerCharges(mols[idx])
-    contribs = [mols[idx].GetAtomWithIdx(i).GetDoubleProp('_GasteigerCharge') for i in range(mols[idx].GetNumAtoms())]
-    fig = SimilarityMaps.GetSimilarityMapFromWeights(mols[idx], contribs, colorMap=None,  contourLines=10)
-    fig.savefig("USPTO-50K-IMAGES/mol-{0}.png".format(idx), bbox_inches='tight')
+# valid_mols = [i for i in mols if i != None]
+# for idx in idx_src_train_arr:
+#     AllChem.ComputeGasteigerCharges(mols[idx])
+#     contribs = [mols[idx].GetAtomWithIdx(i).GetDoubleProp('_GasteigerCharge') for i in range(mols[idx].GetNumAtoms())]
+#     fig = SimilarityMaps.GetSimilarityMapFromWeights(mols[idx], contribs, colorMap=None,  contourLines=10)
+#     fig.savefig("USPTO-50K-IMAGES/mol-{0}.png".format(idx), bbox_inches='tight')
     # grey_img = cv2.cvtColor(d, cv2.COLOR_BGR2GRAY)
     # resized = cv2.resize(grey_img, (128, 128) , interpolation= cv2.INTER_AREA)
     # kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (3,3))
