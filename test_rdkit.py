@@ -12,7 +12,7 @@ from PIL import Image
 
 idx_src_train_arr = []
 image_src_train_list = []
-smiles = open('USPTO-50K/src-train.txt', 'r')
+smiles = open('USPTO-50K/src-test.txt', 'r')
 content = smiles.read()
 chunks = content.split('\n')
 chunks.remove('')
