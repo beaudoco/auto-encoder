@@ -17,7 +17,7 @@ def smiles_image_create(x):
     AllChem.ComputeGasteigerCharges(mol)
     contribs = [mol.GetAtomWithIdx(i).GetDoubleProp('_GasteigerCharge') for i in range(mol.GetNumAtoms())]
     fig = SimilarityMaps.GetSimilarityMapFromWeights(mol, contribs, colorMap=None,  contourLines=10)
-    fig.savefig("USPTO-50K-IMAGES-SRC-TEST/mol-{0}.png".format(x[0]), bbox_inches='tight')
+    fig.savefig("USPTO-50K-IMAGES-SRC-TRAIN/mol-{0}.png".format(x[0]), bbox_inches='tight')
     plt.close()
     # fig.FinishDrawing()
     # fig.cla()
@@ -26,7 +26,7 @@ def smiles_image_create(x):
     
 idx_src_train_arr = []
 image_src_train_list = []
-smiles = open('USPTO-50K/src-test.txt', 'r')
+smiles = open('USPTO-50K/src-train.txt', 'r')
 content = smiles.read()
 chunks = content.split('\n')
 chunks.remove('')
