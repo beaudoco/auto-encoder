@@ -12,7 +12,7 @@ from PIL import Image
 
 idx_src_train_arr = []
 image_src_train_list = []
-smiles = open('USPTO-50K/src-test.txt', 'r')
+smiles = open('USPTO-50K/src-train.txt', 'r')
 content = smiles.read()
 chunks = content.split('\n')
 chunks.remove('')
@@ -32,7 +32,7 @@ for idx in range(len(chunks)):
         AllChem.ComputeGasteigerCharges(mol)
         contribs = [mol.GetAtomWithIdx(i).GetDoubleProp('_GasteigerCharge') for i in range(mol.GetNumAtoms())]
         fig = SimilarityMaps.GetSimilarityMapFromWeights(mol, contribs, colorMap=None,  contourLines=10)
-        fig.savefig("USPTO-50K-IMAGES/mol-{0}.png".format(idx), bbox_inches='tight')
+        fig.savefig("USPTO-50K-IMAGES-SRC-TRAIN/mol-{0}.png".format(idx), bbox_inches='tight')
 
 smiles.close()
 # mols = [Chem.MolFromSmiles(x) for x in chunks]
