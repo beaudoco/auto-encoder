@@ -3,16 +3,30 @@ from rdkit.Chem.Draw import SimilarityMaps
 from rdkit.Chem import AllChem
 from rdkit.Chem import Draw
 import matplotlib
+import matplotlib.pyplot as plt
 from rdkit import Chem
 import cv2
 import numpy as np
 from numpy import asarray
 import io
 from PIL import Image
+import multiprocessing
 
+def smiles_image_create(x):
+    mol =(Chem.MolFromSmiles(x[1]))
+    AllChem.ComputeGasteigerCharges(mol)
+    contribs = [mol.GetAtomWithIdx(i).GetDoubleProp('_GasteigerCharge') for i in range(mol.GetNumAtoms())]
+    fig = SimilarityMaps.GetSimilarityMapFromWeights(mol, contribs, colorMap=None,  contourLines=10)
+    fig.savefig("USPTO-50K-IMAGES-SRC-TEST/mol-{0}.png".format(x[0]), bbox_inches='tight')
+    plt.close()
+    # fig.FinishDrawing()
+    # fig.cla()
+    # fig.
+
+    
 idx_src_train_arr = []
 image_src_train_list = []
-smiles = open('USPTO-50K/src-train.txt', 'r')
+smiles = open('USPTO-50K/src-test.txt', 'r')
 content = smiles.read()
 chunks = content.split('\n')
 chunks.remove('')
@@ -20,25 +34,25 @@ chunks2 = content.split('\n')
 chunks2.remove('')
 content_src_train = smiles.read()
 mols = []
+smiles.close()
 for idx in range(len(chunks)):
     chunks[idx] = chunks[idx].replace(" ", "").split('>',1)[1]
     chunks2[idx] = chunks2[idx].replace(" ", "")
     chunks[idx] = chunks[idx].replace(" ", "").split('>',1)[0].replace("<RX_","")
     if(chunks2[idx].split('>',1)[0].replace("<RX_","") == "1"):
         # print(idx)
-        idx_src_train_arr.append(idx)
+        #idx_src_train_arr.append(idx)
+        idx_src_train_arr.append((idx, chunks[idx]))
 
-        mol = (Chem.MolFromSmiles(chunks[idx]))
-        AllChem.ComputeGasteigerCharges(mol)
-        contribs = [mol.GetAtomWithIdx(i).GetDoubleProp('_GasteigerCharge') for i in range(mol.GetNumAtoms())]
-        fig = SimilarityMaps.GetSimilarityMapFromWeights(mol, contribs, colorMap=None,  contourLines=10)
-        fig.savefig("USPTO-50K-IMAGES-SRC-TRAIN/mol-{0}.png".format(idx), bbox_inches='tight')
-
-smiles.close()
+pool = multiprocessing.Pool()
+pool = multiprocessing.Pool(multiprocessing.cpu_count())
+# inputs = [(0,0),(1,1),(2,2),(3,3),(4,4),(5,5),(6,6),(7,7),(8,8),(9,9)]
+pool.map(smiles_image_create, idx_src_train_arr)
+pool.close()
 # mols = [Chem.MolFromSmiles(x) for x in chunks]
-mols = []
-for x in chunks:
-    mols.append(Chem.MolFromSmiles(x))
+# mols = []
+# for x in chunks:
+#     mols.append(Chem.MolFromSmiles(x))
 # for idx in idx_src_train_arr:
 #     mols[idx].draw(False, "USPTO-50K-IMAGES-SRC-TRAIN/mol-{0}.png".format(idx))
 #     # image_src_train_list.append(mols[idx].draw(show = False, filename = png))
