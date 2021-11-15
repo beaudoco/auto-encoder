@@ -51,18 +51,18 @@ train_data_tgt = []
 train_data_src = []
 
 for filename in glob.glob('USPTO-50K-IMAGES-TGT-TRAIN/*'):
-    train_data_tgt.append(np.reshape(np.load(filename), [128, 128, 1]))
+    train_data_tgt.append(np.reshape(np.load(filename), [128, 128, 3]))
 
 for filename in glob.glob('USPTO-50K-IMAGES-SRC-TRAIN/*'):
-    train_data_src.append(np.reshape(np.load(filename), [128, 128, 1]))
+    train_data_src.append(np.reshape(np.load(filename), [128, 128, 3]))
 
 test_data_tgt = []
 test_data_src = []
 for filename in glob.glob('USPTO-50K-IMAGES-TGT-TEST/*'):
-    test_data_tgt.append(np.reshape(np.load(filename), [128, 128, 1]))
+    test_data_tgt.append(np.reshape(np.load(filename), [128, 128, 3]))
 
 for filename in glob.glob('USPTO-50K-IMAGES-SRC-TEST/*'):
-    test_data_src.append(np.reshape(np.load(filename), [128, 128, 1]))
+    test_data_src.append(np.reshape(np.load(filename), [128, 128, 3]))
     
 # Normalize and reshape the data
 train_data_tgt = np.array(train_data_tgt)
@@ -81,7 +81,7 @@ test_data_src = preprocess(test_data_src)
 # Display the train data and a version of it with added noise
 # display(train_data_tgt, train_data_src)
 
-input = layers.Input(shape=(128, 128, 1))
+input = layers.Input(shape=(128, 128, 3))
 
 # Encoder
 x = layers.Conv2D(32, (3, 3), activation="relu", padding="same")(input)
