@@ -13,7 +13,7 @@ def preprocess(array):
     """
 
     array = array.astype("float32") / 255.0
-    array = np.reshape(array, (len(array), 128, 128, 1))
+    array = np.reshape(array, (len(array), 128, 128, 3))
     return array
 
 def display(array1, array2):
