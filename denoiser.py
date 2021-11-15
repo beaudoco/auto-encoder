@@ -96,7 +96,7 @@ x = layers.MaxPooling2D((2, 2), padding="same")(x)
 # Decoder
 x = layers.Conv2DTranspose(32, (3, 3), strides=2, activation="relu", padding="same")(x)
 x = layers.Conv2DTranspose(32, (3, 3), strides=2, activation="relu", padding="same")(x)
-x = layers.Conv2D(1, (3, 3), activation="sigmoid", padding="same")(x)
+x = layers.Conv2D(3, (3, 3), activation="sigmoid", padding="same")(x)
 
 # Autoencoder
 autoencoder = Model(input, x)
