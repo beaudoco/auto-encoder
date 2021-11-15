@@ -55,6 +55,7 @@ def smiles_image_create_tgt_test(x):
     # fig.cla()
     # fig.
 
+tuple_src_train_arr = []
 idx_src_train_arr = []
 image_src_train_list = []
 smiles = open('USPTO-50K/src-train.txt', 'r')
@@ -70,11 +71,12 @@ for idx in range(len(chunks)):
     chunks2[idx] = chunks2[idx].replace(" ", "")
     chunks[idx] = chunks[idx].replace(" ", "").split('>',1)[0].replace("<RX_","")
     if(chunks2[idx].split('>',1)[0].replace("<RX_","") == "1"):
-        idx_src_train_arr.append((idx, chunks[idx]))
+        tuple_src_train_arr.append((idx, chunks[idx]))
+        idx_src_train_arr.append(idx)
 
 pool = multiprocessing.Pool()
 pool = multiprocessing.Pool(multiprocessing.cpu_count())
-pool.map(smiles_image_create_src_train, idx_src_train_arr)
+pool.map(smiles_image_create_src_train, tuple_src_train_arr)
 pool.close()
 
 smiles = open('USPTO-50K/tgt-train.txt', 'r')
@@ -84,19 +86,19 @@ chunks.remove('')
 for idx in range(len(chunks)):
     chunks[idx] = chunks[idx].replace(" ", "")
 smiles.close()
-idx_tgt_train_arr = []
+tuple_tgt_train_arr = []
 for idx in idx_src_train_arr:
-    idx_tgt_train_arr.append((idx, chunks[idx]))
+    tuple_tgt_train_arr.append((idx, chunks[idx]))
 
 pool = multiprocessing.Pool()
 pool = multiprocessing.Pool(multiprocessing.cpu_count())
-pool.map(smiles_image_create_tgt_train, idx_tgt_train_arr)
+pool.map(smiles_image_create_tgt_train, tuple_tgt_train_arr)
 pool.close()
 
 #get the list of images from our first type of reactions
 for filename in glob.glob('USPTO-50K-IMAGES-SRC-TRAIN/*'):
     # print(filename)
-    for idx in idx_src_train_arr:
+    for idx in tuple_src_train_arr:
         # print("USPTO-50K-IMAGES-SRC-TRAIN/mol-{0}.png".format(idx))
         if(filename == "USPTO-50K-IMAGES-SRC-TRAIN/mol-{0}.png".format(idx)):
             img = cv2.imread(filename)
@@ -114,7 +116,7 @@ for filename in glob.glob('USPTO-50K-IMAGES-SRC-TRAIN/*'):
 #get the matching reactant images
 image_tgt_train_list = []
 for filename in glob.glob('USPTO-50K-IMAGES-TGT-TRAIN/*'):
-    for idx in idx_src_train_arr:
+    for idx in tuple_src_train_arr:
         if(filename == "USPTO-50K-IMAGES-TGT-TRAIN/mol-{0}.png".format(idx)):
             img = cv2.imread(filename)
             resized = cv2.resize(img, (128, 128) , interpolation= cv2.INTER_AREA)
@@ -127,6 +129,7 @@ for filename in glob.glob('USPTO-50K-IMAGES-TGT-TRAIN/*'):
             np.save("USPTO-50K-IMAGES-TGT-TRAIN/mol-{0}.npy".format(idx), asarray(flatten))
             os.remove("USPTO-50K-IMAGES-TGT-TRAIN/mol-{0}.png".format(idx))
 
+tuple_src_test_arr = []
 idx_src_test_arr = []
 image_src_test_list = []
 smiles = open('USPTO-50K/src-test.txt', 'r')
@@ -143,11 +146,11 @@ for idx in range(len(chunks)):
     chunks[idx] = chunks[idx].replace(" ", "").split('>',1)[0].replace("<RX_","")
     if(chunks2[idx].split('>',1)[0].replace("<RX_","") == "1"):
         # print(idx)
-        idx_src_test_arr.append((idx, chunks[idx]))
+        tuple_src_test_arr.append((idx, chunks[idx]))
 
 pool = multiprocessing.Pool()
 pool = multiprocessing.Pool(multiprocessing.cpu_count())
-pool.map(smiles_image_create_src_test, idx_src_test_arr)
+pool.map(smiles_image_create_src_test, tuple_src_test_arr)
 pool.close()
 
 smiles = open('USPTO-50K/tgt-test.txt', 'r')
@@ -160,7 +163,7 @@ for idx in range(len(chunks)):
 
 idx_tgt_test_arr = []
 for idx in idx_src_test_arr:
-    idx_tgt_train_arr.append((idx, chunks[idx]))
+    tuple_tgt_train_arr.append((idx, chunks[idx]))
 
 pool = multiprocessing.Pool()
 pool = multiprocessing.Pool(multiprocessing.cpu_count())
@@ -170,7 +173,7 @@ pool.close()
 #get the list of images from our first type of reactions
 for filename in glob.glob('USPTO-50K-IMAGES-SRC-TEST/*'):
     # print(filename)
-    for idx in idx_src_test_arr:
+    for idx in tuple_src_test_arr:
         # print("USPTO-50K-IMAGES-SRC-TEST/mol-{0}.png".format(idx))
         if(filename == "USPTO-50K-IMAGES-SRC-TEST/mol-{0}.png".format(idx)):
             img = cv2.imread(filename)
@@ -191,7 +194,7 @@ for filename in glob.glob('USPTO-50K-IMAGES-SRC-TEST/*'):
 #get the matching reactant images
 image_tgt_test_list = []
 for filename in glob.glob('USPTO-50K-IMAGES-TGT-TEST/*'):
-    for idx in idx_src_test_arr:
+    for idx in tuple_src_test_arr:
         if(filename == "USPTO-50K-IMAGES-TGT-TEST/mol-{0}.png".format(idx)):
             img = cv2.imread(filename)
             grey_img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
