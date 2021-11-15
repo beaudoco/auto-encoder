@@ -110,8 +110,8 @@ autoencoder.summary()
 autoencoder.fit(
     x=train_data_src,
     y=train_data_tgt,
-    epochs=50,
-    batch_size=128,
+    epochs=100,
+    batch_size=50,
     shuffle=True,
     validation_data=(test_data_src, test_data_tgt),
 )
