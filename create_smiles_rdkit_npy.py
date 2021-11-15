@@ -98,7 +98,7 @@ pool.close()
 #get the list of images from our first type of reactions
 for filename in glob.glob('USPTO-50K-IMAGES-SRC-TRAIN/*'):
     # print(filename)
-    for idx in tuple_src_train_arr:
+    for idx in idx_src_train_arr:
         # print("USPTO-50K-IMAGES-SRC-TRAIN/mol-{0}.png".format(idx))
         if(filename == "USPTO-50K-IMAGES-SRC-TRAIN/mol-{0}.png".format(idx)):
             img = cv2.imread(filename)
@@ -116,7 +116,7 @@ for filename in glob.glob('USPTO-50K-IMAGES-SRC-TRAIN/*'):
 #get the matching reactant images
 image_tgt_train_list = []
 for filename in glob.glob('USPTO-50K-IMAGES-TGT-TRAIN/*'):
-    for idx in tuple_src_train_arr:
+    for idx in idx_src_train_arr:
         if(filename == "USPTO-50K-IMAGES-TGT-TRAIN/mol-{0}.png".format(idx)):
             img = cv2.imread(filename)
             resized = cv2.resize(img, (128, 128) , interpolation= cv2.INTER_AREA)
@@ -147,6 +147,7 @@ for idx in range(len(chunks)):
     if(chunks2[idx].split('>',1)[0].replace("<RX_","") == "1"):
         # print(idx)
         tuple_src_test_arr.append((idx, chunks[idx]))
+        idx_src_test_arr.append(idx)
 
 pool = multiprocessing.Pool()
 pool = multiprocessing.Pool(multiprocessing.cpu_count())
@@ -161,53 +162,47 @@ smiles.close()
 for idx in range(len(chunks)):
     chunks[idx] = chunks[idx].replace(" ", "")
 
-idx_tgt_test_arr = []
+tuple_tgt_test_arr = []
 for idx in idx_src_test_arr:
-    tuple_tgt_train_arr.append((idx, chunks[idx]))
+    tuple_tgt_test_arr.append((idx, chunks[idx]))
 
 pool = multiprocessing.Pool()
 pool = multiprocessing.Pool(multiprocessing.cpu_count())
-pool.map(smiles_image_create_tgt_test, idx_tgt_test_arr)
+pool.map(smiles_image_create_tgt_test, tuple_tgt_test_arr)
 pool.close()
 
 #get the list of images from our first type of reactions
 for filename in glob.glob('USPTO-50K-IMAGES-SRC-TEST/*'):
     # print(filename)
-    for idx in tuple_src_test_arr:
+    for idx in idx_src_test_arr:
         # print("USPTO-50K-IMAGES-SRC-TEST/mol-{0}.png".format(idx))
         if(filename == "USPTO-50K-IMAGES-SRC-TEST/mol-{0}.png".format(idx)):
             img = cv2.imread(filename)
-            grey_img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-            resized = cv2.resize(grey_img, (128, 128) , interpolation= cv2.INTER_AREA)
-            kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (3,3))
+            resized = cv2.resize(img, (128, 128) , interpolation= cv2.INTER_AREA)
+            # grey_img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+            # resized = cv2.resize(grey_img, (128, 128) , interpolation= cv2.INTER_AREA)
+            # kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (3,3))
             # resized = cv2.erode(resized, kernel, iterations=1)
             flatten = resized.flatten()
             image_src_test_list.append(flatten)
             np.save("USPTO-50K-IMAGES-SRC-TEST/mol-{0}.npy".format(idx), asarray(flatten))
-            # print("shrunk {0}".format(idx))
-            # f = open("USPTO-50K-IMAGES-SRC-TEST/mol-{0}.npy".format(idx), "w")
-            # f.write(asarray(flatten))
-            # f.close()
             os.remove("USPTO-50K-IMAGES-SRC-TEST/mol-{0}.png".format(idx))
 
 
 #get the matching reactant images
 image_tgt_test_list = []
 for filename in glob.glob('USPTO-50K-IMAGES-TGT-TEST/*'):
-    for idx in tuple_src_test_arr:
+    for idx in idx_src_test_arr:
         if(filename == "USPTO-50K-IMAGES-TGT-TEST/mol-{0}.png".format(idx)):
             img = cv2.imread(filename)
-            grey_img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-            resized = cv2.resize(grey_img, (128, 128) , interpolation= cv2.INTER_AREA)
-            kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (3,3))
+            resized = cv2.resize(img, (128, 128) , interpolation= cv2.INTER_AREA)
+            # grey_img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+            # resized = cv2.resize(grey_img, (128, 128) , interpolation= cv2.INTER_AREA)
+            # kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (3,3))
             # resized = cv2.erode(resized, kernel, iterations=1)
             flatten = resized.flatten()
             image_tgt_test_list.append(flatten)
             np.save("USPTO-50K-IMAGES-TGT-TEST/mol-{0}.npy".format(idx), asarray(flatten))
-            # print("shrunk {0}".format(idx))
-            # f = open("USPTO-50K-IMAGES-TGT-TEST/mol-{0}.npy".format(idx), "w")
-            # f.write(asarray(flatten))
-            # f.close()
             os.remove("USPTO-50K-IMAGES-TGT-TEST/mol-{0}.png".format(idx))
 
 # fps = [x.calcfp() for x in mols]
