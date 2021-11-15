@@ -30,13 +30,13 @@ def display(array1, array2):
     plt.figure(figsize=(20, 4))
     for i, (image1, image2) in enumerate(zip(images1, images2)):
         ax = plt.subplot(2, n, i + 1)
-        plt.imshow(image1.reshape(128, 128))
+        plt.imshow(image1.reshape([128, 128,3]))
         plt.gray()
         ax.get_xaxis().set_visible(False)
         ax.get_yaxis().set_visible(False)
 
         ax = plt.subplot(2, n, i + 1 + n)
-        plt.imshow(image2.reshape(128, 128))
+        plt.imshow(image2.reshape([128, 128,3]))
         plt.gray()
         ax.get_xaxis().set_visible(False)
         ax.get_yaxis().set_visible(False)
