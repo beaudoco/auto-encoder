@@ -3,124 +3,160 @@ import numpy as np
 from rdkit import Chem
 
 
-def _genA(self, mol, connected=True, max_length=None):
+class SparseMolecularDataSet():
+    def _generate_AX(self):
+        self.log('Creating features and adjacency matrices..')
 
-    max_length = max_length if max_length is not None else mol.GetNumAtoms()
+        data = []
+        smiles = []
+        data_S = []
+        data_A = []
+        data_X = []
+        data_D = []
+        data_F = []
+        data_Le = []
+        data_Lv = []
 
-    A = np.zeros(shape=(max_length, max_length), dtype=np.int32)
+        max_length = max(mol.GetNumAtoms() for mol in self.data)
+        max_length_s = max(len(Chem.MolToSmiles(mol)) for mol in self.data)
 
-    begin, end = [b.GetBeginAtomIdx() for b in mol.GetBonds()], [b.GetEndAtomIdx() for b in mol.GetBonds()]
-    bond_type = [self.bond_encoder_m[b.GetBondType()] for b in mol.GetBonds()]
+        for i, mol in enumerate(self.data):
+            A = self._genA(mol, connected=True, max_length=max_length)
+            D = np.count_nonzero(A, -1)
+            if A is not None:
+                data.append(mol)
+                smiles.append(Chem.MolToSmiles(mol))
+                data_S.append(self._genS(mol, max_length=max_length_s))
+                data_A.append(A)
+                data_X.append(self._genX(mol, max_length=max_length))
+                data_D.append(D)
+                data_F.append(self._genF(mol, max_length=max_length))
 
-    A[begin, end] = bond_type
-    A[end, begin] = bond_type
+                L = D - A
+                Le, Lv = np.linalg.eigh(L)
 
-    degree = np.sum(A[:mol.GetNumAtoms(), :mol.GetNumAtoms()], axis=-1)
+                data_Le.append(Le)
+                data_Lv.append(Lv)
 
-    return A if connected and (degree > 0).all() else None
+        self.log(date=False)
+        self.log('Created {} features and adjacency matrices  out of {} molecules!'.format(len(data),
+                                                                                           len(self.data)))
 
-def _genX(self, mol, max_length=None):
+        self.data = data
+        self.smiles = smiles
+        self.data_S = data_S
+        self.data_A = data_A
+        self.data_X = data_X
+        self.data_D = data_D
+        self.data_F = data_F
+        self.data_Le = data_Le
+        self.data_Lv = data_Lv
+        self.__len = len(self.data)
 
-    max_length = max_length if max_length is not None else mol.GetNumAtoms()
+    def _genA(self, mol, connected=True, max_length=None):
 
-    return np.array([self.atom_encoder_m[atom.GetAtomicNum()] for atom in mol.GetAtoms()] + [0] * (
-                max_length - mol.GetNumAtoms()), dtype=np.int32)
+        max_length = max_length if max_length is not None else mol.GetNumAtoms()
 
-def _genS(self, mol, max_length=None):
+        A = np.zeros(shape=(max_length, max_length), dtype=np.int32)
 
-    max_length = max_length if max_length is not None else len(Chem.MolToSmiles(mol))
+        begin, end = [b.GetBeginAtomIdx() for b in mol.GetBonds()], [b.GetEndAtomIdx() for b in mol.GetBonds()]
+        bond_type = [self.bond_encoder_m[b.GetBondType()] for b in mol.GetBonds()]
 
-    return np.array([self.smiles_encoder_m[c] for c in Chem.MolToSmiles(mol)] + [self.smiles_encoder_m['E']] * (
-                max_length - len(Chem.MolToSmiles(mol))), dtype=np.int32)
+        A[begin, end] = bond_type
+        A[end, begin] = bond_type
 
-def _genF(self, mol, max_length=None):
+        degree = np.sum(A[:mol.GetNumAtoms(), :mol.GetNumAtoms()], axis=-1)
 
-    max_length = max_length if max_length is not None else mol.GetNumAtoms()
+        return A if connected and (degree > 0).all() else None
 
-    features = np.array([[*[a.GetDegree() == i for i in range(5)],
-                            *[a.GetExplicitValence() == i for i in range(9)],
-                            *[int(a.GetHybridization()) == i for i in range(1, 7)],
-                            *[a.GetImplicitValence() == i for i in range(9)],
-                            a.GetIsAromatic(),
-                            a.GetNoImplicit(),
-                            *[a.GetNumExplicitHs() == i for i in range(5)],
-                            *[a.GetNumImplicitHs() == i for i in range(5)],
-                            *[a.GetNumRadicalElectrons() == i for i in range(5)],
-                            a.IsInRing(),
-                            *[a.IsInRingSize(i) for i in range(2, 9)]] for a in mol.GetAtoms()], dtype=np.int32)
+    def _genX(self, mol, max_length=None):
 
-    return np.vstack((features, np.zeros((max_length - features.shape[0], features.shape[1]))))
+        max_length = max_length if max_length is not None else mol.GetNumAtoms()
 
-def _generate_AX(self):
-    # self.log('Creating features and adjacency matrices..')
+        return np.array([self.atom_encoder_m[atom.GetAtomicNum()] for atom in mol.GetAtoms()] + [0] * (
+                    max_length - mol.GetNumAtoms()), dtype=np.int32)
 
-    data = []
-    smiles = []
-    data_S = []
-    data_A = []
-    data_X = []
-    data_D = []
-    data_F = []
-    data_Le = []
-    data_Lv = []
+    def _genS(self, mol, max_length=None):
 
-    max_length = max(mol.GetNumAtoms() for mol in self)
-    max_length_s = max(len(Chem.MolToSmiles(mol)) for mol in self)
+        max_length = max_length if max_length is not None else len(Chem.MolToSmiles(mol))
 
-    for i, mol in enumerate(self):
-        A = _genA(mol, connected=True, max_length=max_length)
-        D = np.count_nonzero(A, -1)
-        if A is not None:
-            data.append(mol)
-            smiles.append(Chem.MolToSmiles(mol))
-            data_S.append(_genS(mol, max_length=max_length_s))
-            data_A.append(A)
-            data_X.append(_genX(mol, max_length=max_length))
-            data_D.append(D)
-            data_F.append(_genF(mol, max_length=max_length))
+        return np.array([self.smiles_encoder_m[c] for c in Chem.MolToSmiles(mol)] + [self.smiles_encoder_m['E']] * (
+                    max_length - len(Chem.MolToSmiles(mol))), dtype=np.int32)
 
-            L = D - A
-            Le, Lv = np.linalg.eigh(L)
+    def _genF(self, mol, max_length=None):
 
-            data_Le.append(Le)
-            data_Lv.append(Lv)
+        max_length = max_length if max_length is not None else mol.GetNumAtoms()
 
-    # self.log(date=False)
-    # self.log('Created {} features and adjacency matrices  out of {} molecules!'.format(len(data),
-    #                                                                                     len(self.data)))
+        features = np.array([[*[a.GetDegree() == i for i in range(5)],
+                              *[a.GetExplicitValence() == i for i in range(9)],
+                              *[int(a.GetHybridization()) == i for i in range(1, 7)],
+                              *[a.GetImplicitValence() == i for i in range(9)],
+                              a.GetIsAromatic(),
+                              a.GetNoImplicit(),
+                              *[a.GetNumExplicitHs() == i for i in range(5)],
+                              *[a.GetNumImplicitHs() == i for i in range(5)],
+                              *[a.GetNumRadicalElectrons() == i for i in range(5)],
+                              a.IsInRing(),
+                              *[a.IsInRingSize(i) for i in range(2, 9)]] for a in mol.GetAtoms()], dtype=np.int32)
 
-    self.data = data
-    self.smiles = smiles
-    self.data_S = data_S
-    self.data_A = data_A
-    self.data_X = data_X
-    self.data_D = data_D
-    self.data_F = data_F
-    self.data_Le = data_Le
-    self.data_Lv = data_Lv
-    self.__len = len(self.data)
+        return np.vstack((features, np.zeros((max_length - features.shape[0], features.shape[1]))))
+
+
+    def generate(self, add_h=False, filters=lambda x: True, size=None, validation=0.1, test=0.1):
+        # self.log('Extracting {}..'.format(filename))
+
+        # if filename.endswith('.sdf'):
+        #     self.data = list(filter(lambda x: x is not None, Chem.SDMolSupplier(filename)))
+        # elif filename.endswith('.smi'):
+        #     self.data = [Chem.MolFromSmiles(line) for line in open(filename, 'r').readlines()]
+        
+        idx_src_train_arr = []
+        smiles = open('USPTO-50K/src-train.txt', 'r')
+        content = smiles.read()
+        chunks = content.split('\n')
+        chunks.remove('')
+        chunks2 = content.split('\n')
+        chunks2.remove('')
+        smiles.close()
+        mols = []
+        for idx in range(len(chunks)):
+            chunks[idx] = chunks[idx].replace(" ", "").split('>',1)[1]
+            chunks2[idx] = chunks2[idx].replace(" ", "")
+            chunks[idx] = chunks[idx].replace(" ", "").split('>',1)[0].replace("<RX_","")
+            if(chunks2[idx].split('>',1)[0].replace("<RX_","") == "1"):
+                mols.append(Chem.MolFromSmiles(chunks[idx]))
+            
+        self.data = mols
+
+        self.data = list(map(Chem.AddHs, self.data)) if add_h else self.data
+        self.data = list(filter(filters, self.data))
+        self.data = self.data[:size]
+
+        # self.log('Extracted {} out of {} molecules {}adding Hydrogen!'.format(len(self.data),
+        #                                                                         len(Chem.SDMolSupplier(filename)),
+        #                                                                         '' if add_h else 'not '))
+
+        self._generate_encoders_decoders()
+        self._generate_AX()
+
+        self.data = np.array(self.data)
+        self.smiles = np.array(self.smiles)
+        self.data_S = np.stack(self.data_S)
+        self.data_A = np.stack(self.data_A)
+        self.data_X = np.stack(self.data_X)
+        self.data_D = np.stack(self.data_D)
+        self.data_F = np.stack(self.data_F)
+        self.data_Le = np.stack(self.data_Le)
+        self.data_Lv = np.stack(self.data_Lv)
+
+        self.vertexes = self.data_F.shape[-2]
+        self.features = self.data_F.shape[-1]
+
+        self._generate_train_validation_test(validation, test)
 
 if __name__ == '__main__':
-    # data = SparseMolecularDataset()
-    idx_src_train_arr = []
-    image_src_train_list = []
-    smiles = open('USPTO-50K/src-train.txt', 'r')
-    content = smiles.read()
-    chunks = content.split('\n')
-    chunks.remove('')
-    chunks2 = content.split('\n')
-    chunks2.remove('')
-    content_src_train = smiles.read()
-    for idx in range(len(chunks)):
-        chunks[idx] = chunks[idx].replace(" ", "").split('>',1)[1]
-        chunks2[idx] = chunks2[idx].replace(" ", "")
-        chunks[idx] = chunks[idx].replace(" ", "").split('>',1)[0].replace("<RX_","")
-        if(chunks2[idx].split('>',1)[0].replace("<RX_","") == "1"):
-            # print(idx)
-            idx_src_train_arr.append(idx)
-    smiles.close()
-    mols = [Chem.MolFromSmiles(x) for x in chunks]
+    data = SparseMolecularDataSet()
 
-    _generate_AX(mols)
+    data.generate(filters=lambda x: x.GetNumAtoms() <= 9)
     # data.generate('gdb9.sdf', filters=lambda x: x.GetNumAtoms() <= 9)
     # data.save('gdb9_9nodes.sparsedataset')
