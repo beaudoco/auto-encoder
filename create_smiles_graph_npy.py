@@ -4,6 +4,9 @@ from rdkit import Chem
 from datetime import datetime
 
 class SparseMolecularDataSet():
+    def __len__(self):
+        return self.__len
+        
     def _generate_train_validation_test(self, validation, test):
 
         self.log('Creating train, validation and test sets..')
