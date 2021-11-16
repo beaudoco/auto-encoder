@@ -3,7 +3,7 @@ from openbabel import pybel
 from rdkit import Chem
 
 def _generate_AX(self):
-    self.log('Creating features and adjacency matrices..')
+    # self.log('Creating features and adjacency matrices..')
 
     data = []
     smiles = []
