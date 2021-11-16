@@ -2,6 +2,55 @@ import numpy as np
 from openbabel import pybel
 from rdkit import Chem
 
+
+def _genA(self, mol, connected=True, max_length=None):
+
+    max_length = max_length if max_length is not None else mol.GetNumAtoms()
+
+    A = np.zeros(shape=(max_length, max_length), dtype=np.int32)
+
+    begin, end = [b.GetBeginAtomIdx() for b in mol.GetBonds()], [b.GetEndAtomIdx() for b in mol.GetBonds()]
+    bond_type = [self.bond_encoder_m[b.GetBondType()] for b in mol.GetBonds()]
+
+    A[begin, end] = bond_type
+    A[end, begin] = bond_type
+
+    degree = np.sum(A[:mol.GetNumAtoms(), :mol.GetNumAtoms()], axis=-1)
+
+    return A if connected and (degree > 0).all() else None
+
+def _genX(self, mol, max_length=None):
+
+    max_length = max_length if max_length is not None else mol.GetNumAtoms()
+
+    return np.array([self.atom_encoder_m[atom.GetAtomicNum()] for atom in mol.GetAtoms()] + [0] * (
+                max_length - mol.GetNumAtoms()), dtype=np.int32)
+
+def _genS(self, mol, max_length=None):
+
+    max_length = max_length if max_length is not None else len(Chem.MolToSmiles(mol))
+
+    return np.array([self.smiles_encoder_m[c] for c in Chem.MolToSmiles(mol)] + [self.smiles_encoder_m['E']] * (
+                max_length - len(Chem.MolToSmiles(mol))), dtype=np.int32)
+
+def _genF(self, mol, max_length=None):
+
+    max_length = max_length if max_length is not None else mol.GetNumAtoms()
+
+    features = np.array([[*[a.GetDegree() == i for i in range(5)],
+                            *[a.GetExplicitValence() == i for i in range(9)],
+                            *[int(a.GetHybridization()) == i for i in range(1, 7)],
+                            *[a.GetImplicitValence() == i for i in range(9)],
+                            a.GetIsAromatic(),
+                            a.GetNoImplicit(),
+                            *[a.GetNumExplicitHs() == i for i in range(5)],
+                            *[a.GetNumImplicitHs() == i for i in range(5)],
+                            *[a.GetNumRadicalElectrons() == i for i in range(5)],
+                            a.IsInRing(),
+                            *[a.IsInRingSize(i) for i in range(2, 9)]] for a in mol.GetAtoms()], dtype=np.int32)
+
+    return np.vstack((features, np.zeros((max_length - features.shape[0], features.shape[1]))))
+
 def _generate_AX(self):
     # self.log('Creating features and adjacency matrices..')
 
@@ -15,20 +64,20 @@ def _generate_AX(self):
     data_Le = []
     data_Lv = []
 
-    max_length = max(mol.GetNumAtoms() for mol in self.data)
-    max_length_s = max(len(Chem.MolToSmiles(mol)) for mol in self.data)
+    max_length = max(mol.GetNumAtoms() for mol in self)
+    max_length_s = max(len(Chem.MolToSmiles(mol)) for mol in self)
 
-    for i, mol in enumerate(self.data):
-        A = self._genA(mol, connected=True, max_length=max_length)
+    for i, mol in enumerate(self):
+        A = _genA(mol, connected=True, max_length=max_length)
         D = np.count_nonzero(A, -1)
         if A is not None:
             data.append(mol)
             smiles.append(Chem.MolToSmiles(mol))
-            data_S.append(self._genS(mol, max_length=max_length_s))
+            data_S.append(_genS(mol, max_length=max_length_s))
             data_A.append(A)
-            data_X.append(self._genX(mol, max_length=max_length))
+            data_X.append(_genX(mol, max_length=max_length))
             data_D.append(D)
-            data_F.append(self._genF(mol, max_length=max_length))
+            data_F.append(_genF(mol, max_length=max_length))
 
             L = D - A
             Le, Lv = np.linalg.eigh(L)
