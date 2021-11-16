@@ -1,9 +1,12 @@
 import numpy as np
 # from openbabel import pybel
 from rdkit import Chem
-
+from datetime import datetime
 
 class SparseMolecularDataSet():
+    @staticmethod
+    def log(msg='', date=True):
+        print(str(datetime.now().strftime('%Y-%m-%d %H:%M:%S')) + ' ' + str(msg) if date else str(msg))
 
     def _generate_encoders_decoders(self):
         self.log('Creating atoms encoder and decoder..')
