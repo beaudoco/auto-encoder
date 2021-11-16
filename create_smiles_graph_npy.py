@@ -72,6 +72,6 @@ if __name__ == '__main__':
     smiles.close()
     mols = [pybel.readstring("smi", x) for x in chunks]
 
-    mols._generate_AX()
+    _generate_AX(mols)
     # data.generate('gdb9.sdf', filters=lambda x: x.GetNumAtoms() <= 9)
     # data.save('gdb9_9nodes.sparsedataset')
