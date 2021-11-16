@@ -4,6 +4,35 @@ from rdkit import Chem
 
 
 class SparseMolecularDataSet():
+
+    def _generate_encoders_decoders(self):
+        self.log('Creating atoms encoder and decoder..')
+        atom_labels = sorted(set([atom.GetAtomicNum() for mol in self.data for atom in mol.GetAtoms()] + [0]))
+        self.atom_encoder_m = {l: i for i, l in enumerate(atom_labels)}
+        self.atom_decoder_m = {i: l for i, l in enumerate(atom_labels)}
+        self.atom_num_types = len(atom_labels)
+        self.log('Created atoms encoder and decoder with {} atom types and 1 PAD symbol!'.format(
+            self.atom_num_types - 1))
+
+        self.log('Creating bonds encoder and decoder..')
+        bond_labels = [Chem.rdchem.BondType.ZERO] + list(sorted(set(bond.GetBondType()
+                                                                    for mol in self.data
+                                                                    for bond in mol.GetBonds())))
+
+        self.bond_encoder_m = {l: i for i, l in enumerate(bond_labels)}
+        self.bond_decoder_m = {i: l for i, l in enumerate(bond_labels)}
+        self.bond_num_types = len(bond_labels)
+        self.log('Created bonds encoder and decoder with {} bond types and 1 PAD symbol!'.format(
+            self.bond_num_types - 1))
+
+        self.log('Creating SMILES encoder and decoder..')
+        smiles_labels = ['E'] + list(set(c for mol in self.data for c in Chem.MolToSmiles(mol)))
+        self.smiles_encoder_m = {l: i for i, l in enumerate(smiles_labels)}
+        self.smiles_decoder_m = {i: l for i, l in enumerate(smiles_labels)}
+        self.smiles_num_types = len(smiles_labels)
+        self.log('Created SMILES encoder and decoder with {} types and 1 PAD symbol!'.format(
+            self.smiles_num_types - 1))
+
     def _generate_AX(self):
         self.log('Creating features and adjacency matrices..')
 
