@@ -36,9 +36,9 @@ def _generate_AX(self):
             data_Le.append(Le)
             data_Lv.append(Lv)
 
-    self.log(date=False)
-    self.log('Created {} features and adjacency matrices  out of {} molecules!'.format(len(data),
-                                                                                        len(self.data)))
+    # self.log(date=False)
+    # self.log('Created {} features and adjacency matrices  out of {} molecules!'.format(len(data),
+    #                                                                                     len(self.data)))
 
     self.data = data
     self.smiles = smiles
