@@ -47,6 +47,7 @@ for filename in glob.glob('USPTO-50K-IMAGES-SRC-TRAIN/*'):
         if(filename == "USPTO-50K-IMAGES-SRC-TRAIN/mol-{0}.png".format(idx)):
             img = cv2.imread(filename)
             grey_img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+            grey_img = cv2.bitwise_not(grey_img)
             resized = cv2.resize(grey_img, (128, 128) , interpolation= cv2.INTER_AREA)
             kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (3,3))
             resized = cv2.erode(resized, kernel, iterations=1)
@@ -67,6 +68,7 @@ for filename in glob.glob('USPTO-50K-IMAGES-TGT-TRAIN/*'):
         if(filename == "USPTO-50K-IMAGES-TGT-TRAIN/mol-{0}.png".format(idx)):
             img = cv2.imread(filename)
             grey_img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+            grey_img = cv2.bitwise_not(grey_img)
             resized = cv2.resize(grey_img, (128, 128) , interpolation= cv2.INTER_AREA)
             kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (3,3))
             resized = cv2.erode(resized, kernel, iterations=1)
@@ -120,6 +122,7 @@ for filename in glob.glob('USPTO-50K-IMAGES-SRC-TEST/*'):
         if(filename == "USPTO-50K-IMAGES-SRC-TEST/mol-{0}.png".format(idx)):
             img = cv2.imread(filename)
             grey_img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+            grey_img = cv2.bitwise_not(grey_img)
             resized = cv2.resize(grey_img, (128, 128) , interpolation= cv2.INTER_AREA)
             kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (3,3))
             resized = cv2.erode(resized, kernel, iterations=1)
@@ -140,6 +143,7 @@ for filename in glob.glob('USPTO-50K-IMAGES-TGT-TEST/*'):
         if(filename == "USPTO-50K-IMAGES-TGT-TEST/mol-{0}.png".format(idx)):
             img = cv2.imread(filename)
             grey_img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+            grey_img = cv2.bitwise_not(grey_img)
             resized = cv2.resize(grey_img, (128, 128) , interpolation= cv2.INTER_AREA)
             kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (3,3))
             resized = cv2.erode(resized, kernel, iterations=1)
