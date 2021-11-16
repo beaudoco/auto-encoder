@@ -1,5 +1,5 @@
 import numpy as np
-from openbabel import pybel
+# from openbabel import pybel
 from rdkit import Chem
 
 
@@ -119,7 +119,7 @@ if __name__ == '__main__':
             # print(idx)
             idx_src_train_arr.append(idx)
     smiles.close()
-    mols = [pybel.readstring("smi", x) for x in chunks]
+    mols = [Chem.MolFromSmiles(x) for x in chunks]
 
     _generate_AX(mols)
     # data.generate('gdb9.sdf', filters=lambda x: x.GetNumAtoms() <= 9)
