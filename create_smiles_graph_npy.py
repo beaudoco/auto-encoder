@@ -6,7 +6,7 @@ from datetime import datetime
 class SparseMolecularDataSet():
     def __len__(self):
         return self.__len
-        
+
     def _generate_train_validation_test(self, validation, test):
 
         self.log('Creating train, validation and test sets..')
@@ -169,7 +169,6 @@ class SparseMolecularDataSet():
         # elif filename.endswith('.smi'):
         #     self.data = [Chem.MolFromSmiles(line) for line in open(filename, 'r').readlines()]
         
-        idx_src_train_arr = []
         smiles = open('USPTO-50K/src-train.txt', 'r')
         content = smiles.read()
         chunks = content.split('\n')
@@ -185,6 +184,7 @@ class SparseMolecularDataSet():
             if(chunks2[idx].split('>',1)[0].replace("<RX_","") == "1"):
                 mols.append(Chem.MolFromSmiles(chunks[idx]))
             
+        print(len(mols))
         self.data = mols
 
         self.data = list(map(Chem.AddHs, self.data)) if add_h else self.data
