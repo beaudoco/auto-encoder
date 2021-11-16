@@ -4,6 +4,30 @@ from rdkit import Chem
 from datetime import datetime
 
 class SparseMolecularDataSet():
+    def _generate_train_validation_test(self, validation, test):
+
+        self.log('Creating train, validation and test sets..')
+
+        validation = int(validation * len(self))
+        test = int(test * len(self))
+        train = len(self) - validation - test
+
+        self.all_idx = np.random.permutation(len(self))
+        self.train_idx = self.all_idx[0:train]
+        self.validation_idx = self.all_idx[train:train + validation]
+        self.test_idx = self.all_idx[train + validation:]
+
+        self.train_counter = 0
+        self.validation_counter = 0
+        self.test_counter = 0
+
+        self.train_count = train
+        self.validation_count = validation
+        self.test_count = test
+
+        self.log('Created train ({} items), validation ({} items) and test ({} items) sets!'.format(
+            train, validation, test))
+
     @staticmethod
     def log(msg='', date=True):
         print(str(datetime.now().strftime('%Y-%m-%d %H:%M:%S')) + ' ' + str(msg) if date else str(msg))
