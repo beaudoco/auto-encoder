@@ -55,7 +55,7 @@ train_data_src = []
 #     train_data_tgt.append(np.reshape(np.load(filename), [128, 128, 1]))
 data_train = SparseMolecularDataSet()
 data_train.load("./tgt_train.sparsedataset")
-print(data_train[0])
+data_train.log(data_train[0])
 all_idx = np.random.permutation(1000)
 train_idx = all_idx[0:1000]
 first_batch = data_train._next_batch(0,1000,train_idx,1)
