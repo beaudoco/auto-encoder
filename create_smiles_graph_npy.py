@@ -169,7 +169,8 @@ class SparseMolecularDataSet():
         # elif filename.endswith('.smi'):
         #     self.data = [Chem.MolFromSmiles(line) for line in open(filename, 'r').readlines()]
         
-        smiles = open('USPTO-50K/tgt-train.txt', 'r')
+        idx_src_train_arr = []
+        smiles = open('USPTO-50K/src-train.txt', 'r')
         content = smiles.read()
         chunks = content.split('\n')
         chunks.remove('')
@@ -182,9 +183,21 @@ class SparseMolecularDataSet():
             chunks2[idx] = chunks2[idx].replace(" ", "")
             chunks[idx] = chunks[idx].replace(" ", "").split('>',1)[0].replace("<RX_","")
             if(chunks2[idx].split('>',1)[0].replace("<RX_","") == "1"):
-                mols.append(Chem.MolFromSmiles(chunks[idx]))
+                idx_src_train_arr.append(idx)
             
-        print(len(mols))
+        # print(len(mols))
+
+        smiles = open('USPTO-50K/tgt-train.txt', 'r')
+        content = smiles.read()
+        chunks = content.split('\n')
+        chunks.remove('')
+        for idx in range(len(chunks)):
+            chunks[idx] = chunks[idx].replace(" ", "")
+        smiles.close()
+        # mols = [for x in chunks]
+        for idx in idx_src_train_arr:
+            mols.append(Chem.MolFromSmiles(chunks[idx]))
+
         self.data = mols
 
         self.data = list(map(Chem.AddHs, self.data)) if add_h else self.data
