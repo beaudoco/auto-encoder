@@ -12,11 +12,11 @@ class SparseMolecularDataSet():
                 np.random.shuffle(idx)
 
             output = [obj[idx[counter:counter + batch_size]]
-                      for obj in (self.data, self.data_S, self.data_A)]
+                      for obj in (self.data, self.data_A, self.data_X)]
 
             counter += batch_size
         else:
-            output = [obj[idx] for obj in (self.data, self.data_S, self.data_A)]
+            output = [obj[idx] for obj in (self.data, self.data_A, self.data_X)]
 
         return [counter] + output
 
