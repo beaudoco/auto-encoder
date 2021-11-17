@@ -5,10 +5,41 @@ from datetime import datetime
 import pickle
 
 class SparseMolecularDataSet():
+    def _next_batch(self, counter, count, idx, batch_size):
+        if batch_size is not None:
+            if counter + batch_size >= count:
+                counter = 0
+                np.random.shuffle(idx)
+
+            output = [obj[idx[counter:counter + batch_size]]
+                      for obj in (self.data, self.smiles, self.data_S, self.data_A)]
+
+            counter += batch_size
+        else:
+            output = [obj[idx] for obj in (self.data, self.smiles, self.data_S, self.data_A)]
+
+        return [counter] + output
+
+    def load(self, filename, subset=1):
+
+        with open(filename, 'rb') as f:
+            self.__dict__.update(pickle.load(f))
+
+        self.train_idx = np.random.choice(self.train_idx, int(len(self.train_idx) * subset), replace=False)
+        self.validation_idx = np.random.choice(self.validation_idx, int(len(self.validation_idx) * subset),
+                                               replace=False)
+        self.test_idx = np.random.choice(self.test_idx, int(len(self.test_idx) * subset), replace=False)
+
+        self.train_count = len(self.train_idx)
+        self.validation_count = len(self.validation_idx)
+        self.test_count = len(self.test_idx)
+
+        self.__len = self.train_count + self.validation_count + self.test_count
+
     def save(self, filename):
         with open(filename, 'wb') as f:
             pickle.dump(self.__dict__, f)
-            
+
     def __len__(self):
         return self.__len
 
