@@ -61,8 +61,11 @@ for filename in glob.glob('USPTO-50K-IMAGES-SRC-TRAIN/*'):
 data_train = SparseMolecularDataSet()
 data_train.load("./tgt_train.sparsedataset")
 # data_train.log(data_train[0])
-for idx in range(train_count):
-    train_data_tgt.append(data_train._next_batch(0,train_count,idx,1))
+all_idx = np.random.permutation(train_count)
+train_idx = all_idx[0:train_count]
+train_data_tgt = data_train._next_batch(0,train_count,train_idx,train_count)
+# for idx in range(train_count):
+#     train_data_tgt.append(data_train._next_batch(0,train_count,idx,train_count))
 
 test_data_tgt = []
 test_data_src = []
@@ -75,8 +78,11 @@ for filename in glob.glob('USPTO-50K-IMAGES-SRC-TEST/*'):
 
 data_test = SparseMolecularDataSet()
 data_test.load("./tgt_test.sparsedataset")
-for idx in range(test_count):
-    test_data_tgt.append(data_train._next_batch(0,test_count,idx,1))
+all_idx = np.random.permutation(test_count)
+test_idx = all_idx[0:test_count]
+test_data_tgt = data_train._next_batch(0,test_count,test_idx,test_count)
+# for idx in range(test_count):
+#     test_data_tgt.append(data_train._next_batch(0,test_count,idx,1))
     
 # Normalize and reshape the data
 train_data_tgt = np.array(train_data_tgt)
