@@ -80,7 +80,7 @@ data_test = SparseMolecularDataSet()
 data_test.load("./tgt_test.sparsedataset")
 all_idx = np.random.permutation(test_count)
 test_idx = all_idx[0:test_count]
-test_data_tgt = data_train._next_batch(0,test_count,test_idx,test_count)
+test_data_tgt = data_test._next_batch(0,test_count,test_idx,test_count)
 # for idx in range(test_count):
 #     test_data_tgt.append(data_train._next_batch(0,test_count,idx,1))
     
