@@ -74,6 +74,7 @@ test_count = 0
 #     test_data_tgt.append(np.reshape(np.load(filename), [128, 128, 1]))
 
 for filename in glob.glob('USPTO-50K-IMAGES-SRC-TEST/*'):
+    test_count += 1
     test_data_src.append(np.reshape(np.load(filename), [128, 128, 1]))
 
 data_test = SparseMolecularDataSet()
