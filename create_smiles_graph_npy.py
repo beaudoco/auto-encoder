@@ -11,8 +11,8 @@ class SparseMolecularDataSet():
 
         self.log('Creating train, validation and test sets..')
 
-        validation = int(validation * len(self))
-        test = int(test * len(self))
+        validation = 0
+        test = 0
         train = len(self) - validation - test
 
         self.all_idx = np.random.permutation(len(self))
@@ -169,7 +169,7 @@ class SparseMolecularDataSet():
         # elif filename.endswith('.smi'):
         #     self.data = [Chem.MolFromSmiles(line) for line in open(filename, 'r').readlines()]
         
-        smiles = open('USPTO-50K/src-train.txt', 'r')
+        smiles = open('USPTO-50K/tgt-train.txt', 'r')
         content = smiles.read()
         chunks = content.split('\n')
         chunks.remove('')
@@ -216,6 +216,7 @@ class SparseMolecularDataSet():
 if __name__ == '__main__':
     data = SparseMolecularDataSet()
 
-    data.generate(filters=lambda x: x.GetNumAtoms() <= 9)
+    data.generate(filters=lambda x: x.GetNumAtoms() <= 100)
+    data.save('tgt_train.sparsedataset')
     # data.generate('gdb9.sdf', filters=lambda x: x.GetNumAtoms() <= 9)
     # data.save('gdb9_9nodes.sparsedataset')
