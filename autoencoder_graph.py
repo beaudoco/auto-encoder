@@ -50,29 +50,33 @@ def display(array1, array2):
 
 train_data_tgt = []
 train_data_src = []
-
+train_count = 0
 # for filename in glob.glob('USPTO-50K-IMAGES-TGT-TRAIN/*'):
 #     train_data_tgt.append(np.reshape(np.load(filename), [128, 128, 1]))
+
+for filename in glob.glob('USPTO-50K-IMAGES-SRC-TRAIN/*'):
+    train_count += 1
+    train_data_src.append(np.reshape(np.load(filename), [128, 128, 1]))
+
 data_train = SparseMolecularDataSet()
 data_train.load("./tgt_train.sparsedataset")
 # data_train.log(data_train[0])
-all_idx = np.random.permutation(1000)
-train_idx = all_idx[0:1000]
-first_batch = data_train._next_batch(0,1000,train_idx,1)
-print(first_batch)
-
-for filename in glob.glob('USPTO-50K-IMAGES-SRC-TRAIN/*'):
-    train_data_src.append(np.reshape(np.load(filename), [128, 128, 1]))
+for idx in train_count:
+    train_data_tgt.append(data_train._next_batch(0,train_count,idx,1))
 
 test_data_tgt = []
 test_data_src = []
+test_count = 0
 # for filename in glob.glob('USPTO-50K-IMAGES-TGT-TEST/*'):
 #     test_data_tgt.append(np.reshape(np.load(filename), [128, 128, 1]))
-data_test = SparseMolecularDataSet()
-data_test.load("./tgt_test.sparsedataset")
 
 for filename in glob.glob('USPTO-50K-IMAGES-SRC-TEST/*'):
     test_data_src.append(np.reshape(np.load(filename), [128, 128, 1]))
+
+data_test = SparseMolecularDataSet()
+data_test.load("./tgt_test.sparsedataset")
+for idx in test_count:
+    test_data_tgt.append(data_train._next_batch(0,test_count,idx,1))
     
 # Normalize and reshape the data
 train_data_tgt = np.array(train_data_tgt)
