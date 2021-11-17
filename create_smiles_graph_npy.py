@@ -2,8 +2,13 @@ import numpy as np
 # from openbabel import pybel
 from rdkit import Chem
 from datetime import datetime
+import pickle
 
 class SparseMolecularDataSet():
+    def save(self, filename):
+        with open(filename, 'wb') as f:
+            pickle.dump(self.__dict__, f)
+            
     def __len__(self):
         return self.__len
 
