@@ -57,7 +57,7 @@ data_train = SparseMolecularDataSet()
 data_train.load("./tgt_train.sparsedataset")
 all_idx = np.random.permutation(1000)
 train_idx = all_idx[0:1000]
-first_batch = data_train._next_batch(0,1000,train_idx,5)
+first_batch = data_train._next_batch(0,1000,train_idx,1)
 print(first_batch)
 
 for filename in glob.glob('USPTO-50K-IMAGES-SRC-TRAIN/*'):
