@@ -3,8 +3,9 @@ import numpy as np
 from rdkit import Chem
 from datetime import datetime
 import pickle
+import os
 
-class SparseMolecularDataSet():
+class SparseMolecularTrainDataSet():
     def _next_batch(self, counter, count, idx, batch_size):
         if batch_size is not None:
             if counter + batch_size >= count:
@@ -132,6 +133,23 @@ class SparseMolecularDataSet():
 
                 data_Le.append(Le)
                 data_Lv.append(Lv)
+            else:
+                tmpMol = Chem.MolToSmiles(mol)
+                smiles_file = open('USPTO-50K/tgt-train.txt', 'r')
+                content_file = smiles_file.read()
+                chunks_file = content_file.split('\n')
+                chunks_file.remove('')
+                for idx in range(len(chunks_file)):
+                    chunks_file[idx] = chunks_file[idx].replace(" ", "")
+                    if chunks_file[idx] == tmpMol:
+                        src_file_exists = os.path.exists("USPTO-50K-IMAGES-SRC-TRAIN/mol-{0}.npy".format(idx)) 
+                        tgt_file_exists = os.path.exists("USPTO-50K-IMAGES-TGT-TRAIN/mol-{0}.npy".format(idx)) 
+                        if src_file_exists:
+                            os.remove("USPTO-50K-IMAGES-SRC-TRAIN/mol-{0}.npy".format(idx))
+                        if tgt_file_exists:
+                            os.remove("USPTO-50K-IMAGES-TGT-TRAIN/mol-{0}.npy".format(idx))
+                        break
+                smiles_file.close()
 
         self.log(date=False)
         self.log('Created {} features and adjacency matrices  out of {} molecules!'.format(len(data),
@@ -263,7 +281,7 @@ class SparseMolecularDataSet():
         self._generate_train_validation_test(validation, test)
 
 if __name__ == '__main__':
-    data = SparseMolecularDataSet()
+    data = SparseMolecularTrainDataSet()
 
     data.generate(filters=lambda x: x.GetNumAtoms() <= 100)
     data.save('tgt_train.sparsedataset')

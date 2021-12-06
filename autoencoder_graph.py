@@ -1,4 +1,5 @@
-from create_smiles_graph_npy import SparseMolecularDataSet
+from create_smiles_train_graph_npy import SparseMolecularTrainDataSet
+from create_smiles_test_graph_npy import SparseMolecularTestDataSet
 import numpy as np
 import tensorflow as tf
 import matplotlib.pyplot as plt
@@ -58,7 +59,7 @@ for filename in glob.glob('USPTO-50K-IMAGES-SRC-TRAIN/*'):
     train_count += 1
     train_data_src.append(np.reshape(np.load(filename), [128, 128, 1]))
 
-data_train = SparseMolecularDataSet()
+data_train = SparseMolecularTrainDataSet()
 data_train.load("./tgt_train.sparsedataset")
 # data_train.log(data_train[0])
 all_idx = np.random.permutation(train_count)
@@ -77,11 +78,11 @@ for filename in glob.glob('USPTO-50K-IMAGES-SRC-TEST/*'):
     test_count += 1
     test_data_src.append(np.reshape(np.load(filename), [128, 128, 1]))
 
-data_test = SparseMolecularDataSet()
+data_test = SparseMolecularTestDataSet()
 data_test.load("./tgt_test.sparsedataset")
-all_idx = np.random.permutation(12083)
-test_idx = all_idx[0:12083]
-test_data_tgt = data_test._next_batch(0,12083,test_idx,12083)
+all_idx = np.random.permutation(test_count)
+test_idx = all_idx[0:test_count]
+test_data_tgt = data_test._next_batch(0,test_count,test_idx,test_count)
 # for idx in range(test_count):
 #     test_data_tgt.append(data_train._next_batch(0,test_count,idx,1))
     
