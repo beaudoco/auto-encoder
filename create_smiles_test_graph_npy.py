@@ -17,9 +17,16 @@ class SparseMolecularTestDataSet():
 
             counter += batch_size
         else:
-            output = [obj[idx] for obj in (self.data, self.data_A, self.data_X)]
-
-        return [counter] + output
+            # print(len(self.data_X))
+            output = []
+            arr1 = []
+            arr2 = []
+            for idx in range(len(self.data_A)):
+                arr1 = np.array(self.data_A)[idx].reshape(-1)
+                arr2 = np.array(self.data_X)[idx]
+                arr1 = np.concatenate((arr1, arr2), axis = None)
+                output.append(arr1)
+            return output
 
     def load(self, filename, subset=1):
 

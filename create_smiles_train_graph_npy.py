@@ -8,18 +8,28 @@ import os
 class SparseMolecularTrainDataSet():
     def _next_batch(self, counter, count, idx, batch_size):
         if batch_size is not None:
-            if counter + batch_size >= count:
-                counter = 0
-                np.random.shuffle(idx)
+            # if counter + batch_size >= count:
+            #     counter = 0
+            #     np.random.shuffle(idx)
 
+            # print(len(self.data_A))
             output = [obj[idx[counter:counter + batch_size]]
-                      for obj in (self.data, self.data_A, self.data_X)]
+                      for obj in np.concatenate((self.data_A.reshape(-1), self.data_X), axis=1)]
 
             counter += batch_size
         else:
-            output = [obj[idx] for obj in (self.data, self.data_A, self.data_X)]
+            # print(len(self.data_X))
+            output = []
+            arr1 = []
+            arr2 = []
+            for idx in range(len(self.data_A)):
+                arr1 = np.array(self.data_A)[idx].reshape(-1)
+                arr2 = np.array(self.data_X)[idx]
+                arr1 = np.concatenate((arr1, arr2), axis = None)
+                output.append(arr1)
+            # output = [obj[idx] for obj in np.concatenate((self.data_A.reshape(-1), self.data_X), axis=1)]
 
-        return [counter] + output
+        return output
 
     def load(self, filename, subset=1):
 

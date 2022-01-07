@@ -64,7 +64,8 @@ data_train.load("./tgt_train.sparsedataset")
 # data_train.log(data_train[0])
 all_idx = np.random.permutation(train_count)
 train_idx = all_idx[0:train_count]
-train_data_tgt = data_train._next_batch(0,train_count,train_idx,train_count)
+train_data_tgt = data_train._next_batch(0,train_count,train_idx, None)
+# print(len(train_data_tgt))
 # for idx in range(train_count):
 #     train_data_tgt.append(data_train._next_batch(0,train_count,idx,train_count))
 
@@ -82,7 +83,7 @@ data_test = SparseMolecularTestDataSet()
 data_test.load("./tgt_test.sparsedataset")
 all_idx = np.random.permutation(test_count)
 test_idx = all_idx[0:test_count]
-test_data_tgt = data_test._next_batch(0,test_count,test_idx,test_count)
+test_data_tgt = data_test._next_batch(0,test_count,test_idx, None)
 # for idx in range(test_count):
 #     test_data_tgt.append(data_train._next_batch(0,test_count,idx,1))
     
@@ -118,13 +119,17 @@ x = layers.MaxPooling2D((2, 2), padding="same")(x)
 # Decoder
 x = layers.Conv2DTranspose(32, (3, 3), strides=2, activation="relu", padding="same")(x)
 x = layers.Conv2DTranspose(32, (3, 3), strides=2, activation="relu", padding="same")(x)
-x = layers.Conv2D(1, (3, 3), activation="sigmoid", padding="same")(x)
+x = layers.Conv2D(1, (1, 1), activation="sigmoid", padding="same")(x)
 
 # Autoencoder
 autoencoder = Model(input, x)
 optimizer = tf.keras.optimizers.Adam(lr=0.0001)
 autoencoder.compile(optimizer=optimizer, loss="binary_crossentropy")
 autoencoder.summary()
+
+# print(len(test_data_src))
+# print(len(test_data_tgt))
+# print(len(train_data_tgt))
 
 # PLAY W/ LEARNING RATE & BATCH SIZE
 # LR .1 .01 .001
@@ -139,4 +144,4 @@ autoencoder.fit(
 )
 
 predictions = autoencoder.predict(test_data_src)
-# display(test_data_tgt, predictions)
+display(test_data_tgt, predictions)
