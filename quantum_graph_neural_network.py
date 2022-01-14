@@ -8,6 +8,7 @@ import glob
 from create_smiles_test_graph_npy import SparseMolecularTestDataSet
 from create_smiles_train_graph_npy import SparseMolecularTrainDataSet
 
+
 def preprocess(array):
     """
     Normalizes the supplied array and reshapes it into the appropriate format.
@@ -17,15 +18,18 @@ def preprocess(array):
     array = np.reshape(array, (len(array), 128, 128, 1))
     return array
 
+
 n_epochs = 30   # Number of optimization epochs
 n_layers = 1    # Number of random layers
 n_train = 50    # Size of the train dataset
 n_test = 30     # Size of the test dataset
 
-SAVE_PATH = "graph/" # Data saving folder
-PREPROCESS = True           # If False, skip quantum processing and load data from SAVE_PATH
+SAVE_PATH = "graph/"  # Data saving folder
+# If False, skip quantum processing and load data from SAVE_PATH
+PREPROCESS = True
 np.random.seed(0)           # Seed for NumPy random number generator
-tf.random.set_random_seed(0)       # Seed for TensorFlow random number generator
+# Seed for TensorFlow random number generator
+tf.random.set_random_seed(0)
 
 train_data_tgt = []
 train_data_src = []
@@ -39,7 +43,7 @@ data_train = SparseMolecularTrainDataSet()
 data_train.load("./tgt_train.sparsedataset")
 all_idx = np.random.permutation(train_count)
 train_idx = all_idx[0:train_count]
-train_data_tgt = data_train._next_batch(0,train_count,train_idx, None)
+train_data_tgt = data_train._next_batch(0, train_count, train_idx, None)
 
 test_data_tgt = []
 test_data_src = []
@@ -52,7 +56,7 @@ data_test = SparseMolecularTestDataSet()
 data_test.load("./tgt_test.sparsedataset")
 all_idx = np.random.permutation(test_count)
 test_idx = all_idx[0:test_count]
-test_data_tgt = data_test._next_batch(0,test_count,test_idx, None)
+test_data_tgt = data_test._next_batch(0, test_count, test_idx, None)
 
 # print(len(test_data_tgt))
 
@@ -86,6 +90,7 @@ dev = qml.device("default.qubit", wires=4)
 # Random circuit parameters
 rand_params = np.random.uniform(high=2 * np.pi, size=(n_layers, 4))
 
+
 @qml.qnode(dev)
 def circuit(phi):
     # Encoding of 4 classical input values
@@ -97,6 +102,7 @@ def circuit(phi):
 
     # Measurement producing 4 classical output values
     return [qml.expval(qml.PauliZ(j)) for j in range(4)]
+
 
 def quanv(image):
     """Convolves the input image with many applications of the same quantum circuit."""
@@ -119,6 +125,7 @@ def quanv(image):
                 out[j // 2, k // 2, ..., c] = q_results[c]
     return out
 
+
 if PREPROCESS == True:
     q_train_images = []
     print("Quantum pre-processing of train images:")
@@ -134,7 +141,7 @@ if PREPROCESS == True:
         print("{}/{}        ".format(idx + 1, n_test), end="\r")
         q_test_images.append(quanv(img))
     q_test_images = np.asarray(q_test_images)
-    
+
     # Save pre-processed images
     np.save(SAVE_PATH + "q_train_images.npy", q_train_images)
     np.save(SAVE_PATH + "q_test_images.npy", q_test_images)
@@ -171,6 +178,7 @@ for k in range(n_samples):
 plt.tight_layout()
 plt.show()
 
+
 def MyModel():
     """Initializes and returns a custom Keras model
     which is ready to be trained."""
@@ -181,21 +189,33 @@ def MyModel():
 
     model.compile(
         optimizer='adam',
-        loss="sparse_categorical_crossentropy",
+        loss="categorical_crossentropy",
         metrics=["accuracy"],
     )
     return model
 
+
 q_model = MyModel()
 
-q_history = q_model.fit(
-    q_train_images,
-    train_labels,
-    validation_data=(q_test_images, test_labels),
-    batch_size=4,
-    epochs=n_epochs,
-    verbose=2,
-)
+print(len(q_train_images))
+print(len(q_test_images))
+# train_labels = tf.squeeze(train_labels, axis=-1)
+# test_labels = tf.squeeze(test_labels, axis=-1)
+
+q_history = q_model.fit(np.array(q_train_images), np.array(train_labels),
+                        batch_size=4, 
+                        epochs=n_epochs,
+                        #validation_data=(np.array(q_test_images), np.array(test_labels)),
+                        verbose=2)
+
+# q_history = q_model.fit(
+#     q_train_images,
+#     train_labels,
+#     validation_data=(q_test_images, test_labels),
+#     batch_size=4,
+#     epochs=n_epochs,
+#     verbose=2,
+# )
 
 c_model = MyModel()
 
@@ -226,4 +246,3 @@ ax2.set_xlabel("Epoch")
 ax2.legend()
 plt.tight_layout()
 plt.show()
-
